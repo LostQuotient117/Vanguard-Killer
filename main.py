@@ -1,6 +1,9 @@
 import json
 import os
-import subprocess, sys
+import subprocess
+import sys
+import tkinter as tk
+from tkinter import messagebox
 
 CHECKPOINT_FILE = "checkpoint.json"
 step_0_Path = os.path.join(os.path.dirname(__file__), 'step_0.ps1')
@@ -24,9 +27,21 @@ def load_checkpoint():
 
 
 def step_0_execute():
-    p = subprocess.Popen(["powershell.exe", "C:\\Users\\Jannick.Gottschalk\\IdeaProjects\\Vanguard Killer\\step_0.ps1"],
-                         stdout=sys.stdout)
-    p.communicate()
+    root = tk.TK()
+    root.withdraw()
+
+    user_response = messagebox.askokcancel("Confirmation", "Vanguard dependencies will be removed, and your computer "
+                                                           "will restart. After the restart, please reopen this "
+                                                           "program to complete the process.")
+
+    if user_response:
+        commands = ("sc delete vgc;"
+                    "")
+        p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
+                             stdout=sys.stdout)
+        p.communicate()
+    else:
+        print("Program is closed.")
 
 
 def main():
