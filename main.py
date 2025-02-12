@@ -43,6 +43,7 @@ def step_0_execute():
         p.communicate()
     else:
         print("Program is closed.")
+        exit(0)
 
 def step_1_execute():
     root = tk.Tk()
