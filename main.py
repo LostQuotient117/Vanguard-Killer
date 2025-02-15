@@ -1,8 +1,9 @@
 import os
 import subprocess
 import sys
+import time
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 
 #pyinstaller --name VanguardKiller --onefile main.py
@@ -60,6 +61,10 @@ def restart_computer():
                          stdout=sys.stdout)
     p.communicate()
 
+def update_progress(progress, value):
+    progress['value'] = value
+    progress.update_idletasks()
+
 
 #STEPS
 def step_0_execute():
@@ -71,12 +76,25 @@ def step_0_execute():
                                                            " After the restart, please reopen this "
                                                            "program to complete the process.")
     if user_response:
+
+        progress_window = tk.Toplevel(root)
+        progress_window.title("Progress")
+        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
+        progress.pack(pady=20)
+        progress["maximum"] = 100
+
         commands = [
             "sc delete vgc",
             "sc delete vgk"  #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
         ]
+        update_progress(progress, 20)
+        time.sleep(0.5)
         run_cmd_admin(commands)
+        update_progress(progress, 60)
+        time.sleep(0.5)
         uninstall_program("Riot Vanguard")
+        update_progress(progress, 100)
+        time.sleep(1)
         restart_computer()
     else:
         print("Program is closed.")
@@ -90,8 +108,19 @@ def step_1_execute():
     user_response = messagebox.askokcancel("Confirmation", "Vanguard folder will be deleted. You can restart "
                                                            "LOL-Client and start the Updateprocess. Have fun!")
     if user_response:
+        progress_window = tk.Toplevel(root)
+        progress_window.title("Progress")
+        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
+        progress.pack(pady=20)
+        progress["maximum"] = 100
+
+        update_progress(progress, 20)
         command = "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+        update_progress(progress, 60)
+        time.sleep(0.5)
         run_cmd_admin(command)
+        update_progress(progress, 100)
+        time.sleep(0.5)
     else:
         print("Program is closed.")
 
