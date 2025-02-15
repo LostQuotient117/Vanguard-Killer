@@ -4,6 +4,7 @@ import sys
 import tkinter as tk
 from tkinter import messagebox
 
+
 #pyinstaller --name VanguardKiller --onefile main.py
 def run_cmd_admin(commands):
     batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.bat')
@@ -14,6 +15,7 @@ def run_cmd_admin(commands):
         batch_file.write("pause")
 
     subprocess.run(['runas', '/user:Administrator', batch_script_path], shell=True)
+
 
 def is_service_installed(service_name):
     try:
@@ -36,10 +38,12 @@ def is_service_installed(service_name):
         print(f"Error while checking service {service_name}: {e}")
         return False
 
+
 def uninstall_program(program_name):
     try:
         result = subprocess.run(
-            ['wmic', 'product', 'where', f'name="{program_name}"', 'call', 'uninstall'], #TODO: ACHTUNG!!! Nicht ausführen. Braucht Admin-Berechtigung ohne Passwort eingeben zu müssen.
+            ['wmic', 'product', 'where', f'name="{program_name}"', 'call', 'uninstall'],
+            #TODO: ACHTUNG!!! Nicht ausführen. Braucht Admin-Berechtigung ohne Passwort eingeben zu müssen.
             capture_output=True,
             text=True
         )
@@ -50,10 +54,13 @@ def uninstall_program(program_name):
     except Exception as e:
         print(f"An Error occurred: {e}")
 
+
 def restart_computer():
     p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
                          stdout=sys.stdout)
     p.communicate()
+
+
 #STEPS
 def step_0_execute():
     root = tk.Tk()
@@ -66,7 +73,7 @@ def step_0_execute():
     if user_response:
         commands = [
             "sc delete vgc",
-            "sc delete vgk" #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
+            "sc delete vgk"  #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
         ]
         run_cmd_admin(commands)
         uninstall_program("Riot Vanguard")
@@ -74,6 +81,7 @@ def step_0_execute():
     else:
         print("Program is closed.")
         exit(0)
+
 
 def step_1_execute():
     root = tk.Tk()
@@ -86,6 +94,8 @@ def step_1_execute():
         run_cmd_admin(command)
     else:
         print("Program is closed.")
+
+
 #MAIN
 def main():
     servicevgc = "vgc"
