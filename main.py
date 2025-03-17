@@ -39,20 +39,18 @@ def is_service_installed(service_name):
         return False
 
 
-def uninstall_program(program_name):
+def close_program(program_name): #TODO: Das funktioniert anscheinend nur mit Admin-Rechten AAAAHHHHH!!!!
     try:
-        result = subprocess.run(
-            ['wmic', 'product', 'where', f'name="{program_name}"', 'call', 'uninstall'],
-            #TODO: ACHTUNG!!! Nicht ausführen. Braucht Admin-Berechtigung ohne Passwort eingeben zu müssen.
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            print(f"The program '{program_name}' was successfully deinstalled.")
+        # Finden Sie den Prozess anhand des Namens
+        result = subprocess.run(['tasklist', '/FI', f'IMAGENAME eq {program_name}.exe'], stdout=subprocess.PIPE, text=True)
+        if program_name in result.stdout:
+            # Beenden Sie den Prozess
+            subprocess.run(['taskkill', '/F', '/IM', f'{program_name}.exe'])
+            print(f"Programm '{program_name}' wurde geschlossen.")
         else:
-            print(f"Error at uninstalling'{program_name} or it was not found.': {result.stderr}")
+            print(f"Programm '{program_name}' läuft nicht.")
     except Exception as e:
-        print(f"An Error occurred: {e}")
+        print(f"Fehler beim Schließen des Programms: {e}")
 
 
 def restart_computer():
@@ -107,4 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    close_program("vgc")
