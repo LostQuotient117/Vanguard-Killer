@@ -39,23 +39,6 @@ def is_service_installed(service_name):
         print(f"Error while checking service {service_name}: {e}")
         return False
 
-
-def uninstall_program(program_name):
-    try:
-        result = subprocess.run(
-            ['wmic', 'product', 'where', f'name="{program_name}"', 'call', 'uninstall'],
-            #TODO: ACHTUNG!!! Nicht ausführen. Braucht Admin-Berechtigung ohne Passwort eingeben zu müssen.
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            print(f"The program '{program_name}' was successfully deinstalled.")
-        else:
-            print(f"Error at uninstalling'{program_name} or it was not found.': {result.stderr}")
-    except Exception as e:
-        print(f"An Error occurred: {e}")
-
-
 def restart_computer():
     p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
                          stdout=sys.stdout)
@@ -92,7 +75,6 @@ def step_0_execute():
         run_cmd_admin(commands)
         update_progress(progress, 60)
         time.sleep(0.5)
-        uninstall_program("Riot Vanguard")
         update_progress(progress, 100)
         time.sleep(1)
         restart_computer()
@@ -129,7 +111,7 @@ def step_1_execute():
 def main():
     servicevgc = "vgc"
     servicevgk = "vgk"
-    if is_service_installed(servicevgc) or is_service_installed(servicevgk):
+    if is_service_installed(servicevgc) or is_service_installed(servicevgk): #TODO: hier vlt schauen, ob es reicht nur den einen überprüfen
         step_0_execute()
     else:
         step_1_execute()
