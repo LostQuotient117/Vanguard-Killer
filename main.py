@@ -9,17 +9,16 @@ from tkinter import messagebox, ttk
 #pip install pyinstaller
 #python -m PyInstaller --name VanguardKiller --onefile main.py
 def run_cmd_admin(commands):
-    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
-    with open(batch_script_path, 'w') as batch_file:
+    ps_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
+    with open(ps_script_path, 'w') as batch_file:
         #batch_file.write("@echo off\n")
         for command in commands:
-            batch_file.write(f'{command}')
-        batch_file.write("\npause")
+            batch_file.write(f'{command}\n')
+        batch_file.write("pause")
 
     ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{batch_script_path}\"", None, 1
+        None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{ps_script_path}\"", None, 1
     )
-
 
 def is_service_installed(service_name):
     try:
@@ -100,15 +99,26 @@ def step_1_execute():
         progress["maximum"] = 100
 
         update_progress(progress, 20)
-        command = "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+        command = [
+            "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+            ]
         update_progress(progress, 60)
         time.sleep(0.5)
         run_cmd_admin(command)
+        time.sleep(0.5)
+        cleanup()
         update_progress(progress, 100)
         time.sleep(0.5)
     else:
         print("Program is closed.")
 
+def cleanup():
+    exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+    ps_script_path = os.path.join(exe_dir, 'dependencies_Deletion.ps1')
+    if os.path.exists(ps_script_path):
+        os.remove(ps_script_path)
+    print("Cleanup completed.")
+    exit(0)
 
 #MAIN
 def main():
