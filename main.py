@@ -16,6 +16,7 @@ def run_cmd_admin(commands):
             batch_file.write(f'{command}\n')
         batch_file.write("pause")
 
+    # noinspection PyUnresolvedReferences
     ctypes.windll.shell32.ShellExecuteW(
         None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{ps_script_path}\"", None, 1
     )
