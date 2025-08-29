@@ -1,20 +1,24 @@
+import ctypes
 import os
 import subprocess
 import sys
+import time
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 
-#pyinstaller --name VanguardKiller --onefile main.py
+#python -m PyInstaller --name VanguardKiller --onefile main.py
 def run_cmd_admin(commands):
-    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.bat')
+    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
     with open(batch_script_path, 'w') as batch_file:
-        batch_file.write("@echo off\n")
+        #batch_file.write("@echo off\n")
         for command in commands:
-            batch_file.write(f'{command}\n')
-        batch_file.write("pause")
+            batch_file.write(f'{command}')
+        batch_file.write("\npause")
 
-    subprocess.run(['runas', '/user:Administrator', batch_script_path], shell=True)
+    ctypes.windll.shell32.ShellExecuteW(
+        None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{batch_script_path}\"", None, 1
+    )
 
 
 def is_service_installed(service_name):
@@ -37,26 +41,15 @@ def is_service_installed(service_name):
     except Exception as e:
         print(f"Error while checking service {service_name}: {e}")
         return False
-
-
-def close_program(program_name): #TODO: Das funktioniert anscheinend nur mit Admin-Rechten AAAAHHHHH!!!!
-    try:
-        # Finden Sie den Prozess anhand des Namens
-        result = subprocess.run(['tasklist', '/FI', f'IMAGENAME eq {program_name}.exe'], stdout=subprocess.PIPE, text=True)
-        if program_name in result.stdout:
-            # Beenden Sie den Prozess
-            subprocess.run(['taskkill', '/F', '/IM', f'{program_name}.exe'])
-            print(f"Programm '{program_name}' wurde geschlossen.")
-        else:
-            print(f"Programm '{program_name}' läuft nicht.")
-    except Exception as e:
-        print(f"Fehler beim Schließen des Programms: {e}")
-
-
+      
 def restart_computer():
     p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
                          stdout=sys.stdout)
     p.communicate()
+
+def update_progress(progress, value):
+    progress['value'] = value
+    progress.update_idletasks()
 
 
 #STEPS
@@ -69,12 +62,24 @@ def step_0_execute():
                                                            " After the restart, please reopen this "
                                                            "program to complete the process.")
     if user_response:
+
+        progress_window = tk.Toplevel(root)
+        progress_window.title("Progress")
+        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
+        progress.pack(pady=20)
+        progress["maximum"] = 100
+
         commands = [
             "sc delete vgc",
             "sc delete vgk"  #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
         ]
+        update_progress(progress, 20)
+        time.sleep(0.5)
         run_cmd_admin(commands)
-        uninstall_program("Riot Vanguard")
+        update_progress(progress, 60)
+        time.sleep(0.5)
+        update_progress(progress, 100)
+        time.sleep(1)
         restart_computer()
     else:
         print("Program is closed.")
@@ -88,8 +93,19 @@ def step_1_execute():
     user_response = messagebox.askokcancel("Confirmation", "Vanguard folder will be deleted. You can restart "
                                                            "LOL-Client and start the Updateprocess. Have fun!")
     if user_response:
+        progress_window = tk.Toplevel(root)
+        progress_window.title("Progress")
+        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
+        progress.pack(pady=20)
+        progress["maximum"] = 100
+
+        update_progress(progress, 20)
         command = "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+        update_progress(progress, 60)
+        time.sleep(0.5)
         run_cmd_admin(command)
+        update_progress(progress, 100)
+        time.sleep(0.5)
     else:
         print("Program is closed.")
 
@@ -98,7 +114,7 @@ def step_1_execute():
 def main():
     servicevgc = "vgc"
     servicevgk = "vgk"
-    if is_service_installed(servicevgc) or is_service_installed(servicevgk):
+    if is_service_installed(servicevgc) or is_service_installed(servicevgk): #TODO: hier vlt schauen, ob es reicht nur den einen überprüfen
         step_0_execute()
     else:
         step_1_execute()
