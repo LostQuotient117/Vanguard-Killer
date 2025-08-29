@@ -6,7 +6,7 @@ import time
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-
+#pip install pyinstaller
 #python -m PyInstaller --name VanguardKiller --onefile main.py
 def run_cmd_admin(commands):
     batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
