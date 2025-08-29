@@ -121,4 +121,4 @@ def main():
 
 
 if __name__ == "__main__":
-    close_program("vgc")
+    main()
