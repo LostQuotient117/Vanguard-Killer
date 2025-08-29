@@ -41,7 +41,7 @@ def is_service_installed(service_name):
     except Exception as e:
         print(f"Error while checking service {service_name}: {e}")
         return False
-
+      
 def restart_computer():
     p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
                          stdout=sys.stdout)
@@ -121,4 +121,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    close_program("vgc")
