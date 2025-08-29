@@ -1,3 +1,4 @@
+import ctypes
 import os
 import subprocess
 import sys
@@ -6,16 +7,18 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 
-#pyinstaller --name VanguardKiller --onefile main.py
+#python -m PyInstaller --name VanguardKiller --onefile main.py
 def run_cmd_admin(commands):
-    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.bat')
+    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
     with open(batch_script_path, 'w') as batch_file:
-        batch_file.write("@echo off\n")
+        #batch_file.write("@echo off\n")
         for command in commands:
-            batch_file.write(f'{command}\n')
-        batch_file.write("pause")
+            batch_file.write(f'{command}')
+        batch_file.write("\npause")
 
-    subprocess.run(['runas', '/user:Administrator', batch_script_path], shell=True)
+    ctypes.windll.shell32.ShellExecuteW(
+        None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{batch_script_path}\"", None, 1
+    )
 
 
 def is_service_installed(service_name):
