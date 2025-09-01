@@ -33,7 +33,8 @@ def step_0_execute():
     """
     user_response = messagebox.askokcancel("Confirmation",
                                            "Vanguard dependencies will be removed, Vanguard will be uninstalled, "
-                                           "and your computer will restart.\n\n"
+                                           "and your computer will restart.\n"
+                                           "Please close League and the Riot Games Launcher.\n"
                                            "After the restart, please reopen this program to complete the process."
                                            )
     if user_response:
