@@ -1,8 +1,11 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/.ps1
+dist/dependencies_Deletion.ps1
 # Editor-based HTTP Client requests
 /httpRequests/
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+

@@ -2,24 +2,22 @@ import ctypes
 import os
 import subprocess
 import sys
-import time
-import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 
 #pip install pyinstaller
-#python -m PyInstaller --name VanguardKiller --onefile main.py
+#python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest main.py
 def run_cmd_admin(commands):
-    batch_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
-    with open(batch_script_path, 'w') as batch_file:
+    ps_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
+    with open(ps_script_path, 'w') as batch_file:
         #batch_file.write("@echo off\n")
         for command in commands:
-            batch_file.write(f'{command}')
-        batch_file.write("\npause")
+            batch_file.write(f'{command}\n')
+        batch_file.write("pause")
 
+    # noinspection PyUnresolvedReferences
     ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", "powershell.exe", f"-ExecutionPolicy Bypass -File \"{batch_script_path}\"", None, 1
+        None, "runas", "cmd.exe", f"/c del \"{ps_script_path}\"", None, 0
     )
-
 
 def is_service_installed(service_name):
     try:
@@ -54,32 +52,17 @@ def update_progress(progress, value):
 
 #STEPS
 def step_0_execute():
-    root = tk.Tk()
-    root.withdraw()
-
     user_response = messagebox.askokcancel("Confirmation", "Vanguard dependencies will be removed, vanguard will be "
                                                            "deinstalled, and your computer will restart."
                                                            " After the restart, please reopen this "
                                                            "program to complete the process.")
     if user_response:
 
-        progress_window = tk.Toplevel(root)
-        progress_window.title("Progress")
-        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
-        progress.pack(pady=20)
-        progress["maximum"] = 100
-
         commands = [
             "sc delete vgc",
             "sc delete vgk"  #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
         ]
-        update_progress(progress, 20)
-        time.sleep(0.5)
         run_cmd_admin(commands)
-        update_progress(progress, 60)
-        time.sleep(0.5)
-        update_progress(progress, 100)
-        time.sleep(1)
         restart_computer()
     else:
         print("Program is closed.")
@@ -87,28 +70,24 @@ def step_0_execute():
 
 
 def step_1_execute():
-    root = tk.Tk()
-    root.withdraw()
-
     user_response = messagebox.askokcancel("Confirmation", "Vanguard folder will be deleted. You can restart "
                                                            "LOL-Client and start the Updateprocess. Have fun!")
     if user_response:
-        progress_window = tk.Toplevel(root)
-        progress_window.title("Progress")
-        progress = ttk.Progressbar(progress_window, orient="horizontal", length=200, mode="determinate")
-        progress.pack(pady=20)
-        progress["maximum"] = 100
-
-        update_progress(progress, 20)
-        command = "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
-        update_progress(progress, 60)
-        time.sleep(0.5)
+        command = [
+            "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+            ]
         run_cmd_admin(command)
-        update_progress(progress, 100)
-        time.sleep(0.5)
+        cleanup()
     else:
         print("Program is closed.")
 
+def cleanup():
+    exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+    ps_script_path = os.path.join(exe_dir, 'dependencies_Deletion.ps1')
+    if os.path.exists(ps_script_path):
+        os.remove(ps_script_path)
+    print("Cleanup completed.")
+    exit(0)
 
 #MAIN
 def main():
