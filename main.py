@@ -3,7 +3,7 @@ import subprocess
 from tkinter import messagebox
 
 #pip install pyinstaller
-#python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest main.py
+#python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest --icon=Vanguard.ico main.py
 
 def main():
     """
