@@ -1,22 +1,14 @@
 import ctypes
-import os
 import subprocess
-import sys
 from tkinter import messagebox
 
 #pip install pyinstaller
 #python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest main.py
 def run_cmd_admin(commands):
-    ps_script_path = os.path.join(os.getcwd(), 'dependencies_Deletion.ps1')
-    with open(ps_script_path, 'w') as batch_file:
-        #batch_file.write("@echo off\n")
-        for command in commands:
-            batch_file.write(f'{command}\n')
-        batch_file.write("pause")
-
+    cmd_commands = " & ".join(commands)
     # noinspection PyUnresolvedReferences
     ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", "cmd.exe", f"/c del \"{ps_script_path}\"", None, 0
+        None,"runas","cmd.exe",f"/k {cmd_commands}",None,1
     )
 
 def is_service_installed(service_name):
@@ -34,16 +26,14 @@ def is_service_installed(service_name):
                     if state_code == "4":  # RUNNING
                         return True
                     elif state_code == "1":  # STOPPED
+                        return True
+                    else:
                         return False
         return False
     except Exception as e:
         print(f"Error while checking service {service_name}: {e}")
         return False
-      
-def restart_computer():
-    p = subprocess.Popen(["powershell.exe", "Restart-Computer -Force"],
-                         stdout=sys.stdout)
-    p.communicate()
+
 
 def update_progress(progress, value):
     progress['value'] = value
@@ -59,11 +49,22 @@ def step_0_execute():
     if user_response:
 
         commands = [
+            "echo Stop services...",
+            "timeout /t 2 /nobreak >nul",
+            "sc stop vgc",
+            "sc stop vgk"
+            "timeout /t 2 /nobreak >nul",
+            "echo Kill vgtray.exe, the program behind Vortex...",
+            "taskkill /f /im vgtray.exe",
+            "timeout /t 2 /nobreak >nul",
+            "echo Delete Serices...",
             "sc delete vgc",
-            "sc delete vgk"  #TODO: Er scheint den zweiten Dienst nicht ordentlich zu deinstallieren
+            "sc delete vgk",
+            "echo Done. Restarting...",
+            "timeout /t 4 /nobreak >nul",
+            "shutdown /r /t 0"
         ]
         run_cmd_admin(commands)
-        restart_computer()
     else:
         print("Program is closed.")
         exit(0)
@@ -74,26 +75,24 @@ def step_1_execute():
                                                            "LOL-Client and start the Updateprocess. Have fun!")
     if user_response:
         command = [
-            "Remove-Item -Path 'C:\\Program Files\\Riot Vanguard' -Recurse -Force;"
+            "echo Kill vgtray.exe, the program behind Vortex...",
+            "timeout /t 2 /nobreak >nul",
+            "taskkill /f /im vgtray.exe",
+            "timeout /t 2 /nobreak >nul",
+            "echo Delete 'Riot Vanguard'-folder...",
+            "rmdir /s /q \"C:\\Program Files\\Riot Vanguard\"",
+            "timeout /t 2 /nobreak >nul",
+            "echo Finished! Closing...",
+            "timeout /t 2 /nobreak >nul",
+            "exit"
             ]
         run_cmd_admin(command)
-        cleanup()
     else:
         print("Program is closed.")
 
-def cleanup():
-    exe_dir = os.path.dirname(os.path.abspath(sys.executable))
-    ps_script_path = os.path.join(exe_dir, 'dependencies_Deletion.ps1')
-    if os.path.exists(ps_script_path):
-        os.remove(ps_script_path)
-    print("Cleanup completed.")
-    exit(0)
-
 #MAIN
 def main():
-    servicevgc = "vgc"
-    servicevgk = "vgk"
-    if is_service_installed(servicevgc) or is_service_installed(servicevgk): #TODO: hier vlt schauen, ob es reicht nur den einen überprüfen
+    if is_service_installed("vgc") or is_service_installed("vgk"):
         step_0_execute()
     else:
         step_1_execute()
