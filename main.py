@@ -1,5 +1,7 @@
 import ctypes
+import os
 import subprocess
+import sys
 from tkinter import messagebox
 
 #pip install pyinstaller
@@ -67,7 +69,7 @@ def step_1_execute():
 
     If the user accepts, the function:
     - Kills the vgtray.exe process
-    - Deletes the 'Riot Vanguard' folder
+    - Deletes the 'Riot Vanguard' folder after detecting main drive
     - Closes the program
 
     If declined, the program prints a closing message and exits.
@@ -78,13 +80,14 @@ def step_1_execute():
                                            "Have fun!"
                                            )
     if user_response:
+        main_drive = os.path.splitdrive(sys.executable)[0]
         commands = [
             "echo Kill vgtray.exe, the program behind Vortex...",
             "timeout /t 2 /nobreak >nul",
             "taskkill /f /im vgtray.exe",
             "timeout /t 2 /nobreak >nul",
             "echo Delete 'Riot Vanguard'-folder...",
-            "rmdir /s /q \"C:\\Program Files\\Riot Vanguard\"",
+            "rmdir /s /q \"" + main_drive + "\\Program Files\\Riot Vanguard\"",
             "timeout /t 2 /nobreak >nul",
             "echo Finished! Closing...",
             "timeout /t 4 /nobreak >nul",
