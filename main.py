@@ -5,7 +5,7 @@ import sys
 from tkinter import messagebox
 
 #pip install pyinstaller
-#python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest --icon=Vanguard.ico main.py
+#python -m PyInstaller --name VanguardKiller --onefile --manifest=VanguardKiller.exe.manifest --icon=VanguardKiller.ico main.py
 
 def main():
     """
